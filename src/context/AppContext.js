@@ -1,0 +1,51 @@
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import { MOCK_USER, MOCK_RUNS, MOCK_STATS, MOCK_UNLOCKED_BADGES } from '../data/mockData';
+
+const AppContext = createContext(null);
+
+export function AppProvider({ children }) {
+  const [user, setUser] = useState(MOCK_USER);
+  const [runs, setRuns] = useState(MOCK_RUNS);
+  const [stats, setStats] = useState(MOCK_STATS);
+  const [unlockedBadges, setUnlockedBadges] = useState(MOCK_UNLOCKED_BADGES);
+  const [activePlanId, setActivePlanId] = useState(MOCK_USER.currentPlanId);
+  const [planProgress, setPlanProgress] = useState({ week: MOCK_USER.currentPlanWeek, day: 1 });
+  const [lastRun, setLastRun] = useState(null);
+
+  const saveRun = useCallback((runData) => {
+    const newRun = { ...runData, id: `r${Date.now()}`, date: new Date().toISOString() };
+    setRuns(prev => [newRun, ...prev]);
+    setLastRun(newRun);
+    setStats(prev => ({
+      ...prev,
+      totalRuns: prev.totalRuns + 1,
+      totalDistanceKm: prev.totalDistanceKm + runData.distanceKm,
+      weeklyDistanceKm: prev.weeklyDistanceKm + runData.distanceKm,
+      weeklyRuns: prev.weeklyRuns + 1,
+    }));
+  }, []);
+
+  const updateUser = useCallback((updates) => {
+    setUser(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  return (
+    <AppContext.Provider value={{
+      user, updateUser,
+      runs, saveRun,
+      stats,
+      unlockedBadges,
+      activePlanId, setActivePlanId,
+      planProgress, setPlanProgress,
+      lastRun,
+    }}>
+      {children}
+    </AppContext.Provider>
+  );
+}
+
+export const useApp = () => {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error('useApp must be used within AppProvider');
+  return ctx;
+};
