@@ -81,6 +81,7 @@ export default function ActiveRunScreen() {
 
   const timerRef = useRef(null);
   const hrRef = useRef(135);
+  const smoothHR = useRef(135); // rolling average to prevent jumpy HR
   const isRunningRef = useRef(true);
   const lastSpokenKm = useRef(0);
   const halfwaySaid = useRef(false);
@@ -126,17 +127,18 @@ export default function ActiveRunScreen() {
       elapsedRef.current += 1;
       const newElapsed = elapsedRef.current;
 
-      // Simulate distance (roughly 5:00-6:30/km pace)
-      const distIncrement = 1 / (300 + Math.random() * 90);
+      // Simulate distance at a steady ~5:30/km pace (1/330 km per second)
+      const distIncrement = 1 / 330;
       distanceRef.current += distIncrement;
       const newDist = distanceRef.current;
       setDistance(newDist);
       setElapsed(newElapsed);
 
-      // Simulate HR drift
-      const baseHR = 130 + (newElapsed / targetDuration) * 15;
-      const variation = (Math.random() - 0.5) * 10;
-      const newHR = Math.round(Math.max(90, Math.min(185, baseHR + variation)));
+      // Simulate HR: drift upward slowly over the run, tiny nudge each second
+      const targetHR = 130 + (newElapsed / targetDuration) * 20;
+      const nudge = (targetHR - smoothHR.current) * 0.02 + (Math.random() - 0.5) * 0.5;
+      smoothHR.current = Math.max(90, Math.min(185, smoothHR.current + nudge));
+      const newHR = Math.round(smoothHR.current);
       hrRef.current = newHR;
       setHeartRate(newHR);
 
