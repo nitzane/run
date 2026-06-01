@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions,
 } from 'react-native';
@@ -144,6 +145,7 @@ function PlanDetail({ plan, currentWeek, onClose, onActivate }) {
 
 export default function TrainingScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { activePlanId, setActivePlanId, planProgress } = useApp();
   const [selectedPlan, setSelectedPlan] = useState(null);
 
@@ -194,19 +196,24 @@ export default function TrainingScreen() {
           ))}
         </View>
 
-        {/* Custom Plan Builder */}
+        {/* AI Custom Plan */}
         <View style={{ paddingHorizontal: 20, marginTop: 8 }}>
-          <TouchableOpacity activeOpacity={0.85}>
-            <GlassCard style={styles.customCard} padding={0}>
-              <LinearGradient colors={['rgba(255,107,157,0.3)', 'rgba(200,168,233,0.2)']} style={styles.customGradient}>
-                <Text style={styles.customIcon}>✨</Text>
-                <View>
-                  <Text style={styles.customTitle}>Custom Plan Builder</Text>
-                  <Text style={styles.customSub}>Set your goal, fitness level & schedule</Text>
+          <TouchableOpacity activeOpacity={0.85} onPress={() => router.push('/custom-plan')}>
+            <View style={styles.customCard}>
+              <LinearGradient colors={['#CE93D8', '#F48FB1', '#FFB74D']} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} />
+              <View style={styles.customGradient}>
+                <View style={{ flex: 1 }}>
+                  <View style={styles.customBadge}>
+                    <Text style={styles.customBadgeText}>✨ NEW</Text>
+                  </View>
+                  <Text style={styles.customTitle}>Your Personal Plan</Text>
+                  <Text style={styles.customSub}>Built by analysing your stats, goals, HR data & zone distribution. Fully unique to you.</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={Colors.primary} />
-              </LinearGradient>
-            </GlassCard>
+                <View style={styles.customArrow}>
+                  <Ionicons name="arrow-forward" size={20} color="#fff" />
+                </View>
+              </View>
+            </View>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -246,11 +253,13 @@ const styles = StyleSheet.create({
   metaText: { fontSize: 12, color: Colors.muted },
   difficultyBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginLeft: 'auto' },
   difficultyText: { fontSize: 10, fontWeight: '700' },
-  customCard: { overflow: 'hidden' },
-  customGradient: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, borderRadius: 20 },
-  customIcon: { fontSize: 28 },
-  customTitle: { fontSize: 16, fontWeight: '700', color: Colors.white },
-  customSub: { fontSize: 12, color: Colors.muted, marginTop: 2 },
+  customCard: { borderRadius: 20, overflow: 'hidden', shadowColor: '#CE93D8', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 16, elevation: 10 },
+  customGradient: { flexDirection: 'row', alignItems: 'center', padding: 20, gap: 12 },
+  customBadge: { alignSelf: 'flex-start', backgroundColor: 'rgba(255,255,255,0.3)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginBottom: 6 },
+  customBadgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
+  customTitle: { fontSize: 18, fontWeight: '800', color: '#fff' },
+  customSub: { fontSize: 12, color: 'rgba(255,255,255,0.85)', marginTop: 4, lineHeight: 17 },
+  customArrow: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
   // Detail view
   detailOverlay: { flex: 1 },
   detailContainer: { flex: 1 },
