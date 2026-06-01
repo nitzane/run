@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#FF6B9D"
       },
       "permissions": ["android.permission.ACTIVITY_RECOGNITION", "android.permission.BODY_SENSORS"]
