@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "RunFlow",
+    "slug": "runflow",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "runflow",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "RunFlow reads your heart rate and workout data to help you train smarter.",
+        "NSHealthUpdateUsageDescription": "RunFlow saves your workouts to Apple Health.",
+        "NSMotionUsageDescription": "RunFlow uses motion data to track your runs."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FF6B9D"
+      },
+      "permissions": ["android.permission.ACTIVITY_RECOGNITION", "android.permission.BODY_SENSORS"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-speech",
+        {
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
