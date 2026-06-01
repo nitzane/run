@@ -40,6 +40,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="challenges"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? 'flame' : 'flame-outline'} color={color} focused={focused} label="Challenges" />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="achievements"
         options={{
           tabBarIcon: ({ color, focused }) => (

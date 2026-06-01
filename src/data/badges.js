@@ -279,5 +279,50 @@ export function getXPLevel(xp) {
   };
 }
 
-export const getBadgesByCategory = (cat) =>
-  cat === 'all' ? BADGES : BADGES.filter(b => b.category === cat);
+// ── CHALLENGE BADGES (monthly, seasonal, holiday, milestone) ─────────────────
+// These are injected from challenges.js at runtime via getAllChallengeBadges()
+// Listed here for reference and static lookup:
+export const CHALLENGE_BADGES = [
+  // Monthly
+  { id: 'challenge-jan', title: 'January Opener', description: 'Completed the January Reset challenge', icon: '🎆', xp: 600, category: 'challenge', rarity: 'rare' },
+  { id: 'challenge-feb', title: 'Heart Runner', description: 'Completed the February Heart Month challenge', icon: '💝', xp: 700, category: 'challenge', rarity: 'rare' },
+  { id: 'challenge-mar', title: 'She Runs the World', description: "Completed the March Women's Month challenge", icon: '🌷', xp: 750, category: 'challenge', rarity: 'epic' },
+  { id: 'challenge-apr', title: 'Earth Runner', description: 'Completed the April Earth Month challenge', icon: '🌍', xp: 700, category: 'challenge', rarity: 'rare' },
+  { id: 'challenge-may', title: 'Mind Over Miles', description: 'Completed the May Mental Health Month challenge', icon: '🧠', xp: 650, category: 'challenge', rarity: 'rare' },
+  { id: 'challenge-jun', title: 'Run in Full Colour', description: 'Completed the June Pride Month challenge', icon: '🌈', xp: 800, category: 'challenge', rarity: 'epic' },
+  { id: 'challenge-jul', title: 'Heat Wave Hustler', description: 'Completed the July Peak Summer challenge', icon: '🔥', xp: 750, category: 'challenge', rarity: 'epic' },
+  { id: 'challenge-aug', title: 'Last of Summer', description: 'Completed the August Final Summer Push challenge', icon: '🌻', xp: 900, category: 'challenge', rarity: 'epic' },
+  { id: 'challenge-sep', title: 'Harvest Runner', description: 'Completed the September Autumn Harvest challenge', icon: '🍂', xp: 800, category: 'challenge', rarity: 'epic' },
+  { id: 'challenge-oct', title: 'Spooky Sprinter', description: 'Completed the October Halloween challenge', icon: '🎃', xp: 800, category: 'challenge', rarity: 'epic' },
+  { id: 'challenge-nov', title: 'Grateful Strider', description: 'Completed the November Gratitude Month challenge', icon: '🙏', xp: 700, category: 'challenge', rarity: 'rare' },
+  { id: 'challenge-dec', title: 'Winter Warrior', description: 'Completed the December Winter Warrior challenge', icon: '⛄', xp: 1000, category: 'challenge', rarity: 'legendary' },
+  // Seasonal
+  { id: 'challenge-winter', title: 'Winter Solstice Warrior', description: 'Conquered the Winter Solstice Series', icon: '🌨️', xp: 3000, category: 'challenge', rarity: 'legendary' },
+  { id: 'challenge-spring', title: 'Spring Bloom Champion', description: 'Completed the Spring Bloom Series', icon: '🌸', xp: 2500, category: 'challenge', rarity: 'legendary' },
+  { id: 'challenge-summer', title: 'Summer Solstice Goddess', description: 'Completed the Summer Solstice Series', icon: '☀️', xp: 4000, category: 'challenge', rarity: 'legendary' },
+  { id: 'challenge-autumn', title: 'Autumn Harvest Queen', description: 'Completed the Autumn Harvest Series', icon: '🍁', xp: 3500, category: 'challenge', rarity: 'legendary' },
+  // Holiday
+  { id: 'holiday-new-year', title: "New Year's First Step", description: 'Ran on January 1st', icon: '🎆', xp: 500, category: 'challenge', rarity: 'epic' },
+  { id: 'holiday-valentines', title: 'Running Romantic', description: "Ran on Valentine's Day 💕", icon: '💘', xp: 400, category: 'challenge', rarity: 'rare' },
+  { id: 'holiday-stpatricks', title: 'Lucky Legs', description: "Ran on St. Patrick's Day", icon: '🍀', xp: 317, category: 'challenge', rarity: 'uncommon' },
+  { id: 'holiday-earthday', title: 'Earth Day Mover', description: 'Ran on Earth Day', icon: '🌍', xp: 350, category: 'challenge', rarity: 'rare' },
+  { id: 'holiday-mothersday', title: "Mama's Run", description: "Ran on Mother's Day", icon: '💐', xp: 400, category: 'challenge', rarity: 'rare' },
+  { id: 'holiday-solstice', title: 'Solstice Runner', description: 'Ran on the Summer Solstice', icon: '🌞', xp: 621, category: 'challenge', rarity: 'epic' },
+  { id: 'holiday-freedom', title: 'Freedom Runner', description: 'Ran on Independence Weekend', icon: '🗽', xp: 400, category: 'challenge', rarity: 'uncommon' },
+  { id: 'holiday-world-running', title: 'World Runner', description: 'Ran on World Running Day', icon: '🌏', xp: 300, category: 'challenge', rarity: 'rare' },
+  { id: 'holiday-halloween', title: 'Halloween Haunter', description: 'Ran on Halloween 🎃', icon: '🎃', xp: 666, category: 'challenge', rarity: 'epic' },
+  { id: 'holiday-turkey-trot', title: 'Turkey Trotter', description: 'Ran the Turkey Trot', icon: '🦃', xp: 500, category: 'challenge', rarity: 'rare' },
+  { id: 'holiday-christmas', title: 'Santa Dasher', description: 'Ran on Christmas Day', icon: '🎅', xp: 750, category: 'challenge', rarity: 'legendary' },
+  { id: 'holiday-nye', title: 'Year Closer', description: "Ran on New Year's Eve", icon: '🥂', xp: 800, category: 'challenge', rarity: 'legendary' },
+  // Milestone challenges
+  { id: 'challenge-full-year', title: 'Full Year Runner', description: 'Ran in every single month of the year', icon: '🗓️', xp: 5000, category: 'challenge', rarity: 'legendary' },
+  { id: 'challenge-four-seasons', title: 'Four Seasons Champion', description: 'Completed all 4 seasonal running challenges', icon: '🌍', xp: 8000, category: 'challenge', rarity: 'legendary' },
+];
+
+export const ALL_BADGES = [...BADGES, ...CHALLENGE_BADGES];
+
+export const getBadgesByCategory = (cat) => {
+  const all = ALL_BADGES;
+  if (cat === 'all') return all;
+  return all.filter(b => b.category === cat);
+};
