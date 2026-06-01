@@ -14,6 +14,8 @@ export function AppProvider({ children }) {
   const [lastRun, setLastRun] = useState(null);
   const [avatar, setAvatar] = useState(DEFAULT_AVATAR);
   const [xp, setXp] = useState(1240); // demo XP
+  // trainingDays: 0=Sun,1=Mon,...,6=Sat. Default Mon/Wed/Thu/Sat.
+  const [trainingDays, setTrainingDays] = useState([1, 3, 4, 6]);
 
   const saveRun = useCallback((runData) => {
     const newRun = { ...runData, id: `r${Date.now()}`, date: new Date().toISOString() };
@@ -43,6 +45,7 @@ export function AppProvider({ children }) {
       lastRun,
       avatar, setAvatar,
       xp, setXp,
+      trainingDays, setTrainingDays,
     }}>
       {children}
     </AppContext.Provider>

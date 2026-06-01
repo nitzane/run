@@ -12,7 +12,7 @@ import GlassCard from '../../src/components/GlassCard';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { user, updateUser, stats, unlockedBadges } = useApp();
+  const { user, updateUser, stats, unlockedBadges, trainingDays, setTrainingDays } = useApp();
   const [appleHealth, setAppleHealth] = useState(false);
   const [stravaConnected, setStravaConnected] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -163,6 +163,43 @@ export default function ProfileScreen() {
           </GlassCard>
         </View>
 
+        {/* Training Schedule */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
+          <GlassCard>
+            <Text style={styles.sectionTitle}>Training Schedule</Text>
+            <Text style={styles.scheduleNote}>
+              Tap days to toggle. Rest days won't break your streak.
+            </Text>
+            <View style={styles.daysRow}>
+              {['S','M','T','W','T','F','S'].map((label, dow) => {
+                const active = trainingDays.includes(dow);
+                return (
+                  <TouchableOpacity
+                    key={dow}
+                    onPress={() => {
+                      setTrainingDays(prev =>
+                        active
+                          ? prev.filter(d => d !== dow)
+                          : [...prev, dow].sort((a, b) => a - b)
+                      );
+                    }}
+                    style={[styles.dayBtn, active && styles.dayBtnActive]}
+                  >
+                    <Text style={[styles.dayBtnText, active && styles.dayBtnTextActive]}>{label}</Text>
+                    {!active && <Text style={styles.restLabel}>REST</Text>}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <View style={styles.scheduleSummary}>
+              <Ionicons name="information-circle-outline" size={14} color={Colors.muted} />
+              <Text style={styles.scheduleSummaryText}>
+                {trainingDays.length} run days · {7 - trainingDays.length} rest days per week
+              </Text>
+            </View>
+          </GlassCard>
+        </View>
+
         {/* Goals */}
         <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
           <GlassCard>
@@ -214,4 +251,26 @@ const styles = StyleSheet.create({
   stravaBtnText: { fontSize: 12, fontWeight: '700', color: Colors.white },
   goalRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
   goalText: { fontSize: 14, color: Colors.offWhite },
+  scheduleNote: { fontSize: 12, color: Colors.muted, marginBottom: 14, marginTop: -4 },
+  daysRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 4 },
+  dayBtn: {
+    flex: 1,
+    aspectRatio: 0.7,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: 'rgba(100,181,246,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(100,181,246,0.25)',
+    gap: 2,
+  },
+  dayBtnActive: {
+    backgroundColor: 'rgba(255,107,157,0.2)',
+    borderColor: Colors.primary,
+  },
+  dayBtnText: { fontSize: 13, fontWeight: '800', color: Colors.muted },
+  dayBtnTextActive: { color: Colors.white },
+  restLabel: { fontSize: 7, color: '#64B5F6', fontWeight: '700', letterSpacing: 0.3 },
+  scheduleSummary: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 12 },
+  scheduleSummaryText: { fontSize: 12, color: Colors.muted },
 });

@@ -37,7 +37,9 @@ function FloatingOrb({ x, y, size, color, delay }) {
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user, stats, runs, unlockedBadges } = useApp();
+  const { user, stats, runs, unlockedBadges, trainingDays } = useApp();
+  const todayDow = new Date().getDay();
+  const isRestDay = !trainingDays.includes(todayDow);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -133,25 +135,45 @@ export default function HomeScreen() {
           </GlassCard>
         </Animated.View>
 
-        {/* Today's Training Recommendation */}
+        {/* Today's card — rest day or workout */}
         <Animated.View style={{ opacity: fadeAnim, marginTop: 16 }}>
-          <GlassCard style={styles.trainingCard} padding={0}>
-            <LinearGradient colors={['rgba(67,160,71,0.3)', 'rgba(102,187,106,0.1)']} style={styles.trainingGradient}>
-              <View style={styles.trainingHeader}>
-                <View>
-                  <Text style={styles.trainingLabel}>TODAY'S WORKOUT</Text>
-                  <Text style={styles.trainingTitle}>Zone 2 Easy Run</Text>
-                  <Text style={styles.trainingDetail}>40 min · Keep HR 111-130 BPM</Text>
+          {isRestDay ? (
+            <GlassCard style={styles.trainingCard} padding={0}>
+              <LinearGradient colors={['rgba(100,181,246,0.25)', 'rgba(77,208,225,0.1)']} style={styles.trainingGradient}>
+                <View style={styles.trainingHeader}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.trainingLabel, { color: '#64B5F6' }]}>REST DAY</Text>
+                    <Text style={styles.trainingTitle}>Recovery & Recharge</Text>
+                    <Text style={styles.trainingDetail}>Your streak is safe — enjoy the rest 💙</Text>
+                  </View>
+                  <View style={styles.trainingIcon}>
+                    <Text style={{ fontSize: 32 }}>🛁</Text>
+                  </View>
                 </View>
-                <View style={styles.trainingIcon}>
-                  <Text style={{ fontSize: 32 }}>💚</Text>
+                <Text style={styles.trainingDesc}>
+                  Rest days are when your body actually gets stronger. Hydrate, stretch, sleep well, and come back fresh tomorrow.
+                </Text>
+              </LinearGradient>
+            </GlassCard>
+          ) : (
+            <GlassCard style={styles.trainingCard} padding={0}>
+              <LinearGradient colors={['rgba(67,160,71,0.3)', 'rgba(102,187,106,0.1)']} style={styles.trainingGradient}>
+                <View style={styles.trainingHeader}>
+                  <View>
+                    <Text style={styles.trainingLabel}>TODAY'S WORKOUT</Text>
+                    <Text style={styles.trainingTitle}>Zone 2 Easy Run</Text>
+                    <Text style={styles.trainingDetail}>40 min · Keep HR 111-130 BPM</Text>
+                  </View>
+                  <View style={styles.trainingIcon}>
+                    <Text style={{ fontSize: 32 }}>💚</Text>
+                  </View>
                 </View>
-              </View>
-              <Text style={styles.trainingDesc}>
-                Keep your effort conversational. You should be able to hold a full sentence comfortably. Focus on form and consistency.
-              </Text>
-            </LinearGradient>
-          </GlassCard>
+                <Text style={styles.trainingDesc}>
+                  Keep your effort conversational. You should be able to hold a full sentence comfortably. Focus on form and consistency.
+                </Text>
+              </LinearGradient>
+            </GlassCard>
+          )}
         </Animated.View>
 
         {/* Recent Badges */}

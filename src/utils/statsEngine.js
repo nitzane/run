@@ -6,7 +6,7 @@ const METERS_PER_KM = 1000;
 
 // ─── Core aggregators ─────────────────────────────────────────────────────────
 
-export function computeAllStats(runs = []) {
+export function computeAllStats(runs = [], options = {}) {
   if (!runs.length) return null;
 
   const sorted = [...runs].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -98,7 +98,7 @@ export function computeAllStats(runs = []) {
     tsb: Math.round(tsb * 10) / 10,
 
     // Streaks
-    currentStreak: computeCurrentStreak(runs),
+    currentStreak: computeCurrentStreak(runs, options?.trainingDays),
     longestStreak: computeLongestStreak(runs),
     consistency,
 
@@ -444,15 +444,40 @@ function computeZoneDistribution(runs) {
   return result;
 }
 
-function computeCurrentStreak(runs) {
-  const days = new Set(runs.map(r => new Date(r.date).toDateString()));
-  let streak = 0;
+// trainingDays: array of day-of-week indices (0=Sun … 6=Sat).
+// Streak counts consecutive training days where user ran.
+// Rest days are skipped (don't break the streak).
+// Grace rule: if last run was within 7 days, streak is never 0 —
+// we treat any gap shorter than 7 days as still-alive.
+export function computeCurrentStreak(runs, trainingDays = [1, 2, 3, 4, 5]) {
+  if (!runs.length) return 0;
+  const runDaySet = new Set(runs.map(r => new Date(r.date).toDateString()));
+
+  // Grace: last run within 7 calendar days keeps streak alive
+  const lastRunDate = runs
+    .map(r => new Date(r.date))
+    .reduce((a, b) => (a > b ? a : b));
+  const daysSinceLastRun = Math.floor((Date.now() - lastRunDate) / 86400000);
+  if (daysSinceLastRun >= 7) return 0;
+
   const today = new Date();
+  let streak = 0;
   for (let i = 0; i < 365; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
-    if (days.has(d.toDateString())) streak++;
-    else if (i > 0) break;
+    const dow = d.getDay();
+
+    // Skip rest days — they never break or count the streak
+    if (!trainingDays.includes(dow)) continue;
+
+    if (runDaySet.has(d.toDateString())) {
+      streak++;
+    } else if (i === 0) {
+      // Today is a training day but hasn't been run yet — don't penalise
+      continue;
+    } else {
+      break;
+    }
   }
   return streak;
 }
