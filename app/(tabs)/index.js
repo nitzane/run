@@ -62,6 +62,7 @@ export default function HomeScreen() {
     ).start();
   }, []);
 
+  if (!user) return null;
   const weeklyProgress = Math.min(stats.weeklyDistanceKm / (user?.weeklyGoalKm || 20), 1);
 
   return (
@@ -120,7 +121,7 @@ export default function HomeScreen() {
             <View style={styles.progressSection}>
               <View style={styles.progressHeader}>
                 <Text style={styles.progressLabel}>Weekly Goal</Text>
-                <Text style={styles.progressText}>{stats.weeklyDistanceKm.toFixed(1)} / {user.weeklyGoalKm} km</Text>
+                <Text style={styles.progressText}>{(stats.weeklyDistanceKm || 0).toFixed(1)} / {user?.weeklyGoalKm ?? 20} km</Text>
               </View>
               <View style={styles.progressBg}>
                 <Animated.View style={[styles.progressFill, { width: `${weeklyProgress * 100}%` }]}>

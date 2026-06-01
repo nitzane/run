@@ -11,35 +11,20 @@ import {
   getPaceChartData, getDistanceChartData, getHRChartData, getWeeklyVolumeData,
   formatPace, formatDuration, ZONE_LABELS,
 } from '../../src/utils/statsEngine';
-import { MOCK_RUNS, MOCK_STATS } from '../../src/data/mockData';
+import { useApp } from '../../src/context/AppContext';
 
 const { width } = Dimensions.get('window');
 const CHART_W = width - 48;
 const CHART_H = 120;
 const TABS = ['Overview', 'Pace', 'Heart Rate', 'Zones', 'Insights'];
 
-// Enrich mock runs with more data for a richer demo
-const DEMO_RUNS = [
-  ...MOCK_RUNS,
-  { id: 'r5', date: new Date(Date.now() - 9*86400000).toISOString(), distanceKm: 7.2, durationSec: 2700, avgPace: 375, avgHR: 141, calories: 520, zones: { 1: 4, 2: 70, 3: 20, 4: 6, 5: 0 } },
-  { id: 'r6', date: new Date(Date.now() - 12*86400000).toISOString(), distanceKm: 5.0, durationSec: 1860, avgPace: 372, avgHR: 143, calories: 361, zones: { 1: 5, 2: 65, 3: 22, 4: 8, 5: 0 } },
-  { id: 'r7', date: new Date(Date.now() - 15*86400000).toISOString(), distanceKm: 9.1, durationSec: 3540, avgPace: 389, avgHR: 138, calories: 657, zones: { 1: 6, 2: 76, 3: 14, 4: 4, 5: 0 } },
-  { id: 'r8', date: new Date(Date.now() - 18*86400000).toISOString(), distanceKm: 4.5, durationSec: 1680, avgPace: 373, avgHR: 146, calories: 325, zones: { 1: 3, 2: 58, 3: 30, 4: 9, 5: 0 } },
-  { id: 'r9', date: new Date(Date.now() - 22*86400000).toISOString(), distanceKm: 6.8, durationSec: 2580, avgPace: 379, avgHR: 144, calories: 491, zones: { 1: 4, 2: 66, 3: 23, 4: 7, 5: 0 } },
-  { id: 'r10', date: new Date(Date.now() - 26*86400000).toISOString(), distanceKm: 5.5, durationSec: 2100, avgPace: 382, avgHR: 147, calories: 397, zones: { 1: 3, 2: 60, 3: 28, 4: 9, 5: 0 } },
-  { id: 'r11', date: new Date(Date.now() - 32*86400000).toISOString(), distanceKm: 4.2, durationSec: 1620, avgPace: 386, avgHR: 150, calories: 303, zones: { 1: 4, 2: 55, 3: 30, 4: 11, 5: 0 } },
-  { id: 'r12', date: new Date(Date.now() - 38*86400000).toISOString(), distanceKm: 8.0, durationSec: 3120, avgPace: 390, avgHR: 148, calories: 578, zones: { 1: 5, 2: 62, 3: 25, 4: 8, 5: 0 } },
-  { id: 'r13', date: new Date(Date.now() - 45*86400000).toISOString(), distanceKm: 5.8, durationSec: 2280, avgPace: 393, avgHR: 151, calories: 419, zones: { 1: 4, 2: 58, 3: 27, 4: 11, 5: 0 } },
-  { id: 'r14', date: new Date(Date.now() - 53*86400000).toISOString(), distanceKm: 4.0, durationSec: 1620, avgPace: 405, avgHR: 153, calories: 289, zones: { 1: 5, 2: 52, 3: 30, 4: 13, 5: 0 } },
-  { id: 'r15', date: new Date(Date.now() - 60*86400000).toISOString(), distanceKm: 6.5, durationSec: 2700, avgPace: 415, avgHR: 155, calories: 469, zones: { 1: 3, 2: 50, 3: 33, 4: 14, 5: 0 } },
-];
-
 export default function StatsScreen() {
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState(0);
   const scrollY = useRef(new Animated.Value(0)).current;
+  const { runs, trainingDays } = useApp();
 
-  const stats = computeAllStats(DEMO_RUNS);
+  const stats = computeAllStats(runs, { trainingDays });
   const insights = generateInsights(stats);
   const weekReport = generateWeeklyReport(stats);
 
@@ -69,8 +54,8 @@ export default function StatsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {tab === 0 && <OverviewTab stats={stats} weekReport={weekReport} />}
-        {tab === 1 && <PaceTab stats={stats} runs={DEMO_RUNS} />}
-        {tab === 2 && <HeartRateTab stats={stats} runs={DEMO_RUNS} />}
+        {tab === 1 && <PaceTab stats={stats} runs={runs} />}
+        {tab === 2 && <HeartRateTab stats={stats} runs={runs} />}
         {tab === 3 && <ZonesTab stats={stats} />}
         {tab === 4 && <InsightsTab insights={insights} stats={stats} />}
       </Animated.ScrollView>

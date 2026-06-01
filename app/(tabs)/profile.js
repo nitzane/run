@@ -16,8 +16,10 @@ export default function ProfileScreen() {
   const [appleHealth, setAppleHealth] = useState(false);
   const [stravaConnected, setStravaConnected] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [editName, setEditName] = useState(user.name);
-  const [editMaxHR, setEditMaxHR] = useState(String(user.maxHR));
+  const [editName, setEditName] = useState(user?.name ?? '');
+  const [editMaxHR, setEditMaxHR] = useState(String(user?.maxHR ?? 185));
+
+  if (!user) return null;
 
   const handleSave = () => {
     updateUser({ name: editName, maxHR: parseInt(editMaxHR) || 185 });
@@ -33,10 +35,10 @@ export default function ProfileScreen() {
         {/* Avatar */}
         <View style={styles.avatarSection}>
           <LinearGradient colors={['#FF6B9D', '#C8A8E9']} style={styles.avatar}>
-            <Text style={styles.avatarText}>{user.name.charAt(0).toUpperCase()}</Text>
+            <Text style={styles.avatarText}>{(user.name || '?').charAt(0).toUpperCase()}</Text>
           </LinearGradient>
           <Text style={styles.profileName}>{user.name}</Text>
-          <Text style={styles.profileLevel}>{user.fitnessLevel.charAt(0).toUpperCase() + user.fitnessLevel.slice(1)} Runner</Text>
+          <Text style={styles.profileLevel}>{(user.fitnessLevel || 'runner').charAt(0).toUpperCase() + (user.fitnessLevel || 'runner').slice(1)} Runner</Text>
         </View>
 
         {/* All-time stats */}
@@ -78,7 +80,7 @@ export default function ProfileScreen() {
               {editing ? (
                 <TextInput style={styles.input} value={editName} onChangeText={setEditName} placeholderTextColor={Colors.muted} />
               ) : (
-                <Text style={styles.infoValue}>{user.name}</Text>
+                <Text style={styles.infoValue}>{user.name ?? '—'}</Text>
               )}
             </View>
             <View style={styles.infoRow}>
@@ -86,16 +88,16 @@ export default function ProfileScreen() {
               {editing ? (
                 <TextInput style={styles.input} value={editMaxHR} onChangeText={setEditMaxHR} keyboardType="numeric" placeholderTextColor={Colors.muted} />
               ) : (
-                <Text style={styles.infoValue}>{user.maxHR} bpm</Text>
+                <Text style={styles.infoValue}>{user.maxHR ?? '—'} bpm</Text>
               )}
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Fitness Level</Text>
-              <Text style={styles.infoValue}>{user.fitnessLevel}</Text>
+              <Text style={styles.infoValue}>{user.fitnessLevel ?? '—'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Weekly Goal</Text>
-              <Text style={styles.infoValue}>{user.weeklyGoalKm} km</Text>
+              <Text style={styles.infoValue}>{user.weeklyGoalKm ?? 20} km</Text>
             </View>
           </GlassCard>
         </View>
@@ -104,9 +106,9 @@ export default function ProfileScreen() {
         <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
           <GlassCard>
             <Text style={styles.sectionTitle}>Training Zones</Text>
-            <Text style={styles.zoneNote}>Based on max HR: {user.maxHR} bpm</Text>
+            <Text style={styles.zoneNote}>Based on max HR: {user.maxHR ?? 190} bpm</Text>
             {[1, 2, 3, 4, 5].map(z => {
-              const range = getZoneRange(z, user.maxHR);
+              const range = getZoneRange(z, user.maxHR ?? 190);
               return (
                 <View key={z} style={styles.zoneRow}>
                   <View style={[styles.zoneDot, { backgroundColor: ZoneColors[z] }]} />
@@ -204,7 +206,7 @@ export default function ProfileScreen() {
         <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
           <GlassCard>
             <Text style={styles.sectionTitle}>My Goals</Text>
-            {user.goals.map((goal, i) => (
+            {(user.goals || []).map((goal, i) => (
               <View key={i} style={styles.goalRow}>
                 <Ionicons name="checkmark-circle" size={18} color={Colors.primary} />
                 <Text style={styles.goalText}>{goal}</Text>
