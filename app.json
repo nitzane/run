@@ -30,7 +30,7 @@
       "expo-font"
     ],
     "experiments": {
-      "typedRoutes": false
+      "typedRoutes": true
     }
   }
 }
