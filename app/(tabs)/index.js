@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../../src/context/AppContext';
+import { TRAINING_PLANS } from '../../src/data/trainingPlans';
 import { BADGES } from '../../src/data/badges';
 import { Colors } from '../../src/utils/colors';
 import { formatPace, formatDuration } from '../../src/utils/hrZones';
@@ -45,9 +46,15 @@ function AppLogo() {
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user, stats, runs, unlockedBadges, trainingDays } = useApp();
+  const { user, stats, runs, unlockedBadges, trainingDays, activePlanId, planProgress } = useApp();
   const todayDow = new Date().getDay();
   const isRestDay = !trainingDays.includes(todayDow);
+
+  // Resolve next session from active plan
+  const activePlan = TRAINING_PLANS.find(p => p.id === activePlanId);
+  const weekIdx = activePlan ? planProgress.week - 1 : 0;
+  const runIdx = activePlan ? planProgress.day - 1 : 0;
+  const nextSession = activePlan?.weeks[weekIdx]?.runs[runIdx] ?? activePlan?.weeks[0]?.runs[0];
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -160,22 +167,49 @@ export default function HomeScreen() {
                 </Text>
               </LinearGradient>
             </GlassCard>
-          ) : (
+          ) : nextSession ? (
             <GlassCard style={styles.trainingCard} padding={0}>
               <LinearGradient colors={['rgba(67,160,71,0.3)', 'rgba(102,187,106,0.1)']} style={styles.trainingGradient}>
                 <View style={styles.trainingHeader}>
-                  <View>
-                    <Text style={styles.trainingLabel}>TODAY'S WORKOUT</Text>
-                    <Text style={styles.trainingTitle}>Zone 2 Easy Run</Text>
-                    <Text style={styles.trainingDetail}>40 min · Keep HR 111-130 BPM</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.trainingLabel}>TODAY'S WORKOUT · {activePlan?.title}</Text>
+                    <Text style={styles.trainingTitle}>{nextSession.type}</Text>
+                    <Text style={styles.trainingDetail}>{nextSession.duration} min · Zone {nextSession.zone}</Text>
                   </View>
                   <View style={styles.trainingIcon}>
                     <Text style={{ fontSize: 32 }}>💚</Text>
                   </View>
                 </View>
-                <Text style={styles.trainingDesc}>
-                  Keep your effort conversational. You should be able to hold a full sentence comfortably. Focus on form and consistency.
-                </Text>
+                <Text style={styles.trainingDesc}>{nextSession.description}</Text>
+                <TouchableOpacity
+                  style={styles.startRunInline}
+                  activeOpacity={0.85}
+                  onPress={() => router.push({
+                    pathname: '/active-run',
+                    params: { planId: activePlan.id, weekIndex: weekIdx, runIndex: runIdx },
+                  })}
+                >
+                  <LinearGradient colors={['#FF6B9D', '#C8A8E9']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.startRunInlineGrad}>
+                    <Ionicons name="play" size={16} color="#fff" />
+                    <Text style={styles.startRunInlineText}>Start This Run</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </LinearGradient>
+            </GlassCard>
+          ) : (
+            <GlassCard style={styles.trainingCard} padding={0}>
+              <LinearGradient colors={['rgba(67,160,71,0.3)', 'rgba(102,187,106,0.1)']} style={styles.trainingGradient}>
+                <View style={styles.trainingHeader}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.trainingLabel}>TODAY'S WORKOUT</Text>
+                    <Text style={styles.trainingTitle}>Free Run</Text>
+                    <Text style={styles.trainingDetail}>No plan active — run your way!</Text>
+                  </View>
+                  <View style={styles.trainingIcon}>
+                    <Text style={{ fontSize: 32 }}>🏃‍♀️</Text>
+                  </View>
+                </View>
+                <Text style={styles.trainingDesc}>Pick a training plan in the Train tab to unlock structured sessions here.</Text>
               </LinearGradient>
             </GlassCard>
           )}
@@ -314,6 +348,9 @@ const styles = StyleSheet.create({
   trainingDetail: { fontSize: 13, color: Colors.muted, marginTop: 2 },
   trainingIcon: { width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   trainingDesc: { fontSize: 13, color: Colors.muted, marginTop: 12, lineHeight: 20 },
+  startRunInline: { marginTop: 14, borderRadius: 12, overflow: 'hidden' },
+  startRunInlineGrad: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 12, paddingHorizontal: 20 },
+  startRunInlineText: { fontSize: 15, fontWeight: '800', color: '#fff' },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20 },
   seeAll: { fontSize: 13, color: Colors.primary },
   badgesScroll: { paddingLeft: 20, marginTop: 8 },

@@ -55,8 +55,18 @@ function PlanCard({ plan, isActive, onSelect }) {
   );
 }
 
-function PlanDetail({ plan, currentWeek, onClose, onActivate }) {
+function PlanDetail({ plan, isActive, currentWeek, currentDay, onClose, onActivate }) {
+  const router = useRouter();
   const weekData = plan.weeks[currentWeek - 1] || plan.weeks[0];
+  const weekIdx = currentWeek - 1;
+
+  const startRun = (runIdx) => {
+    router.push({
+      pathname: '/active-run',
+      params: { planId: plan.id, weekIndex: weekIdx, runIndex: runIdx },
+    });
+  };
+
   return (
     <View style={styles.detailOverlay}>
       <LinearGradient colors={['#1A0A2E', '#2D1B69']} style={styles.detailContainer}>
@@ -68,7 +78,7 @@ function PlanDetail({ plan, currentWeek, onClose, onActivate }) {
           <View style={{ width: 40 }} />
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
           <LinearGradient colors={[...plan.gradient, 'transparent']} style={styles.detailHero}>
             <Text style={{ fontSize: 60 }}>{plan.icon}</Text>
             <Text style={styles.detailHeroTitle}>{plan.title}</Text>
@@ -97,20 +107,37 @@ function PlanDetail({ plan, currentWeek, onClose, onActivate }) {
 
             <GlassCard>
               <Text style={styles.sectionTitle}>Week {currentWeek} — {weekData.focus}</Text>
-              {weekData.runs.map((run, i) => (
-                <View key={i} style={styles.runRow}>
-                  <View style={[styles.runDay, { backgroundColor: plan.gradient[0] + '33' }]}>
-                    <Text style={[styles.runDayText, { color: plan.gradient[0] }]}>{run.day}</Text>
+              {weekData.runs.map((run, i) => {
+                const isNext = isActive && i === currentDay - 1;
+                const isDone = isActive && i < currentDay - 1;
+                return (
+                  <View key={i} style={[styles.runRow, isNext && styles.runRowNext]}>
+                    <View style={[styles.runDay, { backgroundColor: plan.gradient[0] + '33' }]}>
+                      {isDone
+                        ? <Ionicons name="checkmark" size={16} color="#66BB6A" />
+                        : <Text style={[styles.runDayText, { color: plan.gradient[0] }]}>{run.day}</Text>}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.runType}>{run.type} · {run.duration} min</Text>
+                      <Text style={styles.runDesc}>{run.description}</Text>
+                    </View>
+                    <View style={styles.runRowRight}>
+                      <View style={[styles.zoneTag, { backgroundColor: `hsl(${run.zone * 60}, 70%, 50%)22` }]}>
+                        <Text style={styles.zoneTagText}>Z{run.zone}</Text>
+                      </View>
+                      {isActive && (
+                        <TouchableOpacity
+                          style={[styles.startRunBtn, { backgroundColor: plan.gradient[0] }]}
+                          onPress={() => startRun(i)}
+                          activeOpacity={0.8}
+                        >
+                          <Ionicons name="play" size={12} color="#fff" />
+                        </TouchableOpacity>
+                      )}
+                    </View>
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.runType}>{run.type} · {run.duration} min</Text>
-                    <Text style={styles.runDesc}>{run.description}</Text>
-                  </View>
-                  <View style={[styles.zoneTag, { backgroundColor: `hsl(${run.zone * 60}, 70%, 50%)22` }]}>
-                    <Text style={styles.zoneTagText}>Z{run.zone}</Text>
-                  </View>
-                </View>
-              ))}
+                );
+              })}
             </GlassCard>
 
             {/* Week progress */}
@@ -132,11 +159,24 @@ function PlanDetail({ plan, currentWeek, onClose, onActivate }) {
         </ScrollView>
 
         <View style={styles.detailCta}>
-          <TouchableOpacity style={styles.activateBtn} onPress={onActivate} activeOpacity={0.85}>
-            <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.activateBtnGrad}>
-              <Text style={styles.activateBtnText}>Activate This Plan</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          {isActive ? (
+            <TouchableOpacity
+              style={styles.activateBtn}
+              onPress={() => startRun(currentDay - 1)}
+              activeOpacity={0.85}
+            >
+              <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.activateBtnGrad}>
+                <Ionicons name="play" size={18} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.activateBtnText}>Start Today's Run (W{currentWeek} R{currentDay})</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.activateBtn} onPress={onActivate} activeOpacity={0.85}>
+              <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.activateBtnGrad}>
+                <Text style={styles.activateBtnText}>Activate This Plan</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
         </View>
       </LinearGradient>
     </View>
@@ -150,10 +190,13 @@ export default function TrainingScreen() {
   const [selectedPlan, setSelectedPlan] = useState(null);
 
   if (selectedPlan) {
+    const isPlanActive = activePlanId === selectedPlan.id;
     return (
       <PlanDetail
         plan={selectedPlan}
-        currentWeek={activePlanId === selectedPlan.id ? planProgress.week : 1}
+        isActive={isPlanActive}
+        currentWeek={isPlanActive ? planProgress.week : 1}
+        currentDay={isPlanActive ? planProgress.day : 1}
         onClose={() => setSelectedPlan(null)}
         onActivate={() => {
           setActivePlanId(selectedPlan.id);
@@ -283,6 +326,9 @@ const styles = StyleSheet.create({
   overviewStatVal: { fontSize: 24, fontWeight: '800', color: Colors.white },
   overviewStatLabel: { fontSize: 11, color: Colors.muted, marginTop: 2 },
   runRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' },
+  runRowNext: { backgroundColor: 'rgba(255,107,157,0.08)', borderRadius: 10, paddingHorizontal: 6 },
+  runRowRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  startRunBtn: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   runDay: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   runDayText: { fontSize: 11, fontWeight: '700' },
   runType: { fontSize: 13, fontWeight: '600', color: Colors.white },
@@ -301,6 +347,6 @@ const styles = StyleSheet.create({
     right: 20,
   },
   activateBtn: { borderRadius: 16, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 4 } },
-  activateBtnGrad: { padding: 16, alignItems: 'center', borderRadius: 16 },
+  activateBtnGrad: { padding: 16, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', borderRadius: 16 },
   activateBtnText: { fontSize: 16, fontWeight: '800', color: Colors.white },
 });

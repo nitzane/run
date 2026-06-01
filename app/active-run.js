@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Speech from 'expo-speech';
 import { useApp } from '../src/context/AppContext';
@@ -70,7 +70,8 @@ function ZoneIndicator({ zone }) {
 export default function ActiveRunScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user, saveRun, activePlanId } = useApp();
+  const params = useLocalSearchParams();
+  const { user, saveRun, activePlanId, planProgress, setPlanProgress } = useApp();
 
   const [isRunning, setIsRunning] = useState(true);
   const [elapsed, setElapsed] = useState(0);
@@ -81,7 +82,7 @@ export default function ActiveRunScreen() {
 
   const timerRef = useRef(null);
   const hrRef = useRef(135);
-  const smoothHR = useRef(135); // rolling average to prevent jumpy HR
+  const smoothHR = useRef(135);
   const isRunningRef = useRef(true);
   const lastSpokenKm = useRef(0);
   const halfwaySaid = useRef(false);
@@ -92,8 +93,14 @@ export default function ActiveRunScreen() {
   const pace = elapsed > 0 && distance > 0 ? elapsed / distance : 0;
   const calories = estimateCalories(distance, user?.weight || 70);
 
-  const activePlan = TRAINING_PLANS.find(p => p.id === activePlanId);
-  const targetDuration = activePlan ? (activePlan.weeks[0]?.runs[0]?.duration * 60 || 2400) : 2400;
+  // Resolve the plan and specific session to run
+  const planId = params.planId || activePlanId;
+  const activePlan = TRAINING_PLANS.find(p => p.id === planId);
+  const weekIdx = params.weekIndex != null ? Number(params.weekIndex) : (planProgress.week - 1);
+  const runIdx = params.runIndex != null ? Number(params.runIndex) : (planProgress.day - 1);
+  const sessionRun = activePlan?.weeks[weekIdx]?.runs[runIdx] || activePlan?.weeks[0]?.runs[0];
+  const targetDuration = sessionRun ? sessionRun.duration * 60 : 2400;
+  const targetZone = sessionRun?.zone ?? activePlan?.targetZone ?? 2;
 
   const speak = useCallback((text) => {
     Speech.stop();
@@ -102,13 +109,10 @@ export default function ActiveRunScreen() {
 
   // Start announcement
   useEffect(() => {
-    const plan = activePlan;
-    if (plan) {
-      const zone = plan.targetZone;
-      const range = getZoneRange(zone, user.maxHR);
-      const mins = plan.weeks[0]?.runs[0]?.duration || 40;
+    if (activePlan && sessionRun) {
+      const range = getZoneRange(targetZone, user?.maxHR || 190);
       setTimeout(() => {
-        speak(`Hey! We're doing a ${mins} minute ${ZoneNames[zone]} run today. Try to keep your heart rate between ${range.min} and ${range.max} — that sweet spot where you can still chat. You've totally got this, let's go!`);
+        speak(`Hey! We're doing a ${sessionRun.duration} minute ${ZoneNames[targetZone]} run today — ${sessionRun.description}. Try to keep your heart rate between ${range.min} and ${range.max}. You've totally got this, let's go!`);
       }, 1000);
     } else {
       setTimeout(() => speak("Okay, let's do this! Your run is starting now — take a breath, find your rhythm, and let's have some fun out here!"), 1000);
@@ -174,10 +178,9 @@ export default function ActiveRunScreen() {
       }
 
       // Zone drift warning every 30s
-      if (activePlan && newElapsed % 30 === 0) {
-        const targetZ = activePlan.targetZone;
-        if (zone > targetZ + 1) {
-          speak(`Hey, ease up just a little — your heart rate's climbing into Zone ${zone}. Pull it back toward Zone ${targetZ}, nice and controlled. You're doing great, just dial it down a touch.`);
+      if (newElapsed % 30 === 0) {
+        if (zone > targetZone + 1) {
+          speak(`Hey, ease up just a little — your heart rate's climbing into Zone ${zone}. Pull it back toward Zone ${targetZone}, nice and controlled. You're doing great, just dial it down a touch.`);
         }
       }
     }, 1000);
@@ -217,10 +220,26 @@ export default function ActiveRunScreen() {
               avgHR: hrRef.current,
               calories: estimateCalories(finalDist),
               zones: zonePercents,
-              planId: activePlanId,
+              planId: planId || null,
+              weekIndex: weekIdx,
+              runIndex: runIdx,
             };
 
             saveRun(runData);
+
+            // Advance plan progress to next session
+            if (activePlan) {
+              const week = activePlan.weeks[weekIdx];
+              const nextRunIdx = runIdx + 1;
+              if (nextRunIdx < week.runs.length) {
+                setPlanProgress({ week: weekIdx + 1, day: nextRunIdx + 1 });
+              } else {
+                const nextWeekIdx = weekIdx + 1;
+                if (nextWeekIdx < activePlan.weeks.length) {
+                  setPlanProgress({ week: nextWeekIdx + 1, day: 1 });
+                }
+              }
+            }
 
             // Post-run voice summary
             setTimeout(() => {

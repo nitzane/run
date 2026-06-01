@@ -100,7 +100,13 @@ export function AppProvider({ children }) {
 
   const setActivePlanAndSave = useCallback((id) => {
     setActivePlanId(id);
-    persist({ activePlanId: id });
+    setPlanProgress({ week: 1, day: 1 });
+    persist({ activePlanId: id, planProgress: { week: 1, day: 1 } });
+  }, [persist]);
+
+  const setPlanProgressAndSave = useCallback((progress) => {
+    setPlanProgress(progress);
+    persist({ planProgress: progress });
   }, [persist]);
 
   // Derived stats from real runs
@@ -129,7 +135,7 @@ export function AppProvider({ children }) {
       stats,
       unlockedBadges,
       activePlanId, setActivePlanId: setActivePlanAndSave,
-      planProgress, setPlanProgress,
+      planProgress, setPlanProgress: setPlanProgressAndSave,
       lastRun,
       xp, setXp: setXpAndSave,
       trainingDays, setTrainingDays: setTrainingDaysAndSave,
