@@ -86,9 +86,10 @@ export default function ActiveRunScreen() {
   const halfwaySaid = useRef(false);
   const finalPushSaid = useRef(false);
 
-  const currentZone = getZoneFromHR(heartRate, user.maxHR);
+  const maxHR = user?.maxHR || 190;
+  const currentZone = getZoneFromHR(heartRate, maxHR);
   const pace = elapsed > 0 && distance > 0 ? elapsed / distance : 0;
-  const calories = estimateCalories(distance, user.weight || 70);
+  const calories = estimateCalories(distance, user?.weight || 70);
 
   const activePlan = TRAINING_PLANS.find(p => p.id === activePlanId);
   const targetDuration = activePlan ? (activePlan.weeks[0]?.runs[0]?.duration * 60 || 2400) : 2400;
@@ -104,11 +105,12 @@ export default function ActiveRunScreen() {
     if (plan) {
       const zone = plan.targetZone;
       const range = getZoneRange(zone, user.maxHR);
+      const mins = plan.weeks[0]?.runs[0]?.duration || 40;
       setTimeout(() => {
-        speak(`Today's workout is a ${plan.weeks[0]?.runs[0]?.duration || 40} minute ${ZoneNames[zone]} run. Your target heart rate is ${range.min} to ${range.max} BPM. Focus on keeping your effort conversational. Let's go!`);
+        speak(`Hey! We're doing a ${mins} minute ${ZoneNames[zone]} run today. Try to keep your heart rate between ${range.min} and ${range.max} — that sweet spot where you can still chat. You've totally got this, let's go!`);
       }, 1000);
     } else {
-      setTimeout(() => speak("Let's go! Your run has started. Stay strong!"), 1000);
+      setTimeout(() => speak("Okay, let's do this! Your run is starting now — take a breath, find your rhythm, and let's have some fun out here!"), 1000);
     }
     return () => Speech.stop();
   }, []);
@@ -147,27 +149,33 @@ export default function ActiveRunScreen() {
       if (km > lastSpokenKm.current && km > 0) {
         lastSpokenKm.current = km;
         const paceStr = formatPace(newElapsed / newDist);
-        speak(`${km} kilometer. Current pace ${paceStr} per km. Heart rate ${newHR}. Keep it up!`);
+        const kmPhrases = [
+          `${km} k done — you're flying! Pace is looking great at ${paceStr}, heart's sitting at ${newHR}. Keep this beautiful energy going!`,
+          `There's ${km} k! You're doing amazing — ${paceStr} pace, heart rate ${newHR}. Honestly, you look so strong right now.`,
+          `${km} kilometer in the bag! Pace ${paceStr}, heart rate ${newHR}. This is your run, own it!`,
+          `${km} k — yes! Feeling that? ${paceStr} pace and heart's at ${newHR}. You're absolutely crushing this.`,
+        ];
+        speak(kmPhrases[(km - 1) % kmPhrases.length]);
       }
 
       // Halfway
       const progress = newElapsed / targetDuration;
       if (progress >= 0.5 && !halfwaySaid.current) {
         halfwaySaid.current = true;
-        speak("You're halfway there! Amazing work. Keep your breathing steady and stay in your zone.");
+        speak("Halfway! Oh my gosh, you're halfway through — and you still look so strong. Take a little breath, relax those shoulders, and let's bring this home together.");
       }
 
       // Final 10%
       if (progress >= 0.9 && !finalPushSaid.current) {
         finalPushSaid.current = true;
-        speak("Last 10 percent! Give it everything you've got. You're almost there. Push through!");
+        speak("Almost there — just the last little stretch! You have worked so hard today, this is your moment. Dig in, stay tall, and let's finish this strong. You've got it!");
       }
 
       // Zone drift warning every 30s
       if (activePlan && newElapsed % 30 === 0) {
         const targetZ = activePlan.targetZone;
         if (zone > targetZ + 1) {
-          speak(`You're drifting into Zone ${zone}. Slow down and bring your heart rate back to Zone ${targetZ}.`);
+          speak(`Hey, ease up just a little — your heart rate's climbing into Zone ${zone}. Pull it back toward Zone ${targetZ}, nice and controlled. You're doing great, just dial it down a touch.`);
         }
       }
     }, 1000);
@@ -179,7 +187,7 @@ export default function ActiveRunScreen() {
     const newState = !isRunning;
     setIsRunning(newState);
     isRunningRef.current = newState;
-    speak(newState ? "Run resumed. Keep going!" : "Run paused. Take a breather.");
+    speak(newState ? "Welcome back! You're back in it — let's go!" : "Taking a little break, no worries. Whenever you're ready, I'll be right here.");
   };
 
   const handleStop = () => {
@@ -215,7 +223,7 @@ export default function ActiveRunScreen() {
             // Post-run voice summary
             setTimeout(() => {
               const z2pct = zonePercents[2] || 0;
-              speak(`Amazing run! You covered ${finalDist.toFixed(1)} kilometers in ${formatDuration(finalElapsed)}. You spent ${z2pct} percent of your run in Zone 2. Excellent aerobic work today!`);
+              speak(`You did it! ${finalDist.toFixed(1)} kilometers in ${formatDuration(finalElapsed)} — that's something to be genuinely proud of. You spent ${z2pct} percent in Zone 2, which is incredible aerobic work. Go you! Seriously, well done today.`);
             }, 500);
 
             return zh;

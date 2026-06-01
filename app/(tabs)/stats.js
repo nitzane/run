@@ -37,8 +37,17 @@ export default function StatsScreen() {
         <Text style={styles.screenTitle}>Stats & Insights</Text>
       </Animated.View>
 
-      {/* Tabs */}
-      <View style={[styles.tabRow, { marginTop: insets.top + 48 }]}>
+      {/* No runs yet */}
+      {!stats && (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyEmoji}>🏃‍♀️</Text>
+          <Text style={styles.emptyTitle}>No runs yet</Text>
+          <Text style={styles.emptyBody}>Complete your first run and your stats will appear here — pace trends, heart rate zones, training load and more.</Text>
+        </View>
+      )}
+
+      {/* Tabs — only shown when there's data */}
+      {!!stats && <View style={[styles.tabRow, { marginTop: insets.top + 48 }]}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 12 }}>
           {TABS.map((t, i) => (
             <TouchableOpacity key={t} onPress={() => setTab(i)} style={[styles.tab, tab === i && styles.tabActive]}>
@@ -46,9 +55,9 @@ export default function StatsScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </View>
+      </View>}
 
-      <Animated.ScrollView
+      {!!stats && <Animated.ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + 100, paddingTop: 12 }}
         onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
         showsVerticalScrollIndicator={false}
@@ -58,7 +67,7 @@ export default function StatsScreen() {
         {tab === 2 && <HeartRateTab stats={stats} runs={runs} />}
         {tab === 3 && <ZonesTab stats={stats} />}
         {tab === 4 && <InsightsTab insights={insights} stats={stats} />}
-      </Animated.ScrollView>
+      </Animated.ScrollView>}
     </View>
   );
 }
@@ -504,6 +513,10 @@ const IDEAL_ZONES = [
 
 const styles = StyleSheet.create({
   stickyHeader: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, paddingHorizontal: 20, paddingBottom: 12 },
+  emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, marginTop: 80 },
+  emptyEmoji: { fontSize: 56, marginBottom: 16 },
+  emptyTitle: { fontSize: 22, fontWeight: '800', color: '#2D1B69', marginBottom: 10 },
+  emptyBody: { fontSize: 15, color: '#9E9E9E', textAlign: 'center', lineHeight: 22 },
   screenTitle: { fontSize: 28, fontWeight: '800', color: '#2D1B4E', marginTop: 8 },
   tabRow: { marginBottom: 4 },
   tab: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, marginRight: 6 },
