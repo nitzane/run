@@ -40,6 +40,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="stats"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? 'bar-chart' : 'bar-chart-outline'} color={color} focused={focused} label="Stats" />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="challenges"
         options={{
           tabBarIcon: ({ color, focused }) => (
