@@ -62,14 +62,10 @@ export default function HomeScreen() {
     ).start();
   }, []);
 
-  const weeklyProgress = Math.min(stats.weeklyDistanceKm / user.weeklyGoalKm, 1);
+  const weeklyProgress = Math.min(stats.weeklyDistanceKm / (user?.weeklyGoalKm || 20), 1);
 
   return (
     <LinearGradient colors={['#1A0A2E', '#2D1B69', '#11001C']} style={styles.container}>
-      {/* Floating orbs */}
-      <FloatingOrb x={-30} y={100} size={150} color="#FF6B9D" delay={0} />
-      <FloatingOrb x={width - 80} y={200} size={120} color="#C8A8E9" delay={500} />
-      <FloatingOrb x={width / 2 - 60} y={400} size={100} color="#A8D8EA" delay={1000} />
 
       <ScrollView
         style={styles.scroll}
@@ -81,7 +77,7 @@ export default function HomeScreen() {
           <View style={styles.header}>
             <View>
               <Text style={styles.greeting}>Good morning,</Text>
-              <Text style={styles.userName}>{user.name} ✨</Text>
+              <Text style={styles.userName}>{user?.name} ✨</Text>
             </View>
             <TouchableOpacity style={styles.notifBtn}>
               <Ionicons name="notifications-outline" size={22} color={Colors.white} />

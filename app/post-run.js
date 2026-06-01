@@ -11,7 +11,6 @@ import { Colors, ZoneColors, ZoneNames } from '../src/utils/colors';
 import { formatPace, formatDuration } from '../src/utils/hrZones';
 import GlassCard from '../src/components/GlassCard';
 import ZoneBar from '../src/components/ZoneBar';
-import { MOCK_RUNS } from '../src/data/mockData';
 
 const CONFETTI_COLORS = ['#FF6B9D', '#C8A8E9', '#A8D8EA', '#FFD700', '#66BB6A', '#FFA726'];
 
@@ -82,7 +81,7 @@ export default function PostRunScreen() {
     zones: { 1: 5, 2: 68, 3: 20, 4: 7, 5: 0 },
   };
 
-  const prevRun = runs.find(r => r.id !== lastRun?.id) || MOCK_RUNS[1];
+  const prevRun = runs.find(r => r.id !== lastRun?.id) || null;
 
   const badgeEarned = run.distanceKm >= 5 ? { icon: '🌸', title: '5K Finisher', xp: 200 } : null;
 

@@ -12,7 +12,7 @@ import GlassCard from '../../src/components/GlassCard';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { user, updateUser, stats, unlockedBadges, trainingDays, setTrainingDays } = useApp();
+  const { user, updateUser, stats, unlockedBadges, trainingDays, setTrainingDays, xp } = useApp();
   const [appleHealth, setAppleHealth] = useState(false);
   const [stravaConnected, setStravaConnected] = useState(false);
   const [editing, setEditing] = useState(false);
