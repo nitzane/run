@@ -3,10 +3,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet, Text } from 'react-native';
 import { Colors } from '../../src/utils/colors';
 
-function TabIcon({ name, color, focused, label }) {
+function TabIcon({ name, color, label, emoji }) {
   return (
     <View style={styles.tabItem}>
-      <Ionicons name={name} size={24} color={color} />
+      {emoji
+        ? <Text style={styles.tabEmoji}>{emoji}</Text>
+        : <Ionicons name={name} size={22} color={color} />}
       <Text style={[styles.tabLabel, { color }]}>{label}</Text>
     </View>
   );
@@ -18,8 +20,8 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.4)',
+        tabBarActiveTintColor: '#FF6B9D',
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.35)',
         tabBarShowLabel: false,
       }}
     >
@@ -27,7 +29,7 @@ export default function TabLayout() {
         name="index"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name={focused ? 'home' : 'home-outline'} color={color} focused={focused} label="Home" />
+            <TabIcon name={focused ? 'home' : 'home-outline'} color={color} label="Home" />
           ),
         }}
       />
@@ -35,7 +37,7 @@ export default function TabLayout() {
         name="training"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name={focused ? 'calendar' : 'calendar-outline'} color={color} focused={focused} label="Train" />
+            <TabIcon name={focused ? 'calendar' : 'calendar-outline'} color={color} label="Train" />
           ),
         }}
       />
@@ -43,7 +45,7 @@ export default function TabLayout() {
         name="stats"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name={focused ? 'bar-chart' : 'bar-chart-outline'} color={color} focused={focused} label="Stats" />
+            <TabIcon name={focused ? 'bar-chart' : 'bar-chart-outline'} color={color} label="Stats" />
           ),
         }}
       />
@@ -51,7 +53,7 @@ export default function TabLayout() {
         name="challenges"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name={focused ? 'flame' : 'flame-outline'} color={color} focused={focused} label="Challenges" />
+            <TabIcon name={focused ? 'flame' : 'flame-outline'} color={color} label="Challenges" />
           ),
         }}
       />
@@ -59,15 +61,7 @@ export default function TabLayout() {
         name="achievements"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name={focused ? 'trophy' : 'trophy-outline'} color={color} focused={focused} label="Awards" />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="avatar"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name={focused ? 'shirt' : 'shirt-outline'} color={color} focused={focused} label="Avatar" />
+            <TabIcon emoji={focused ? '🏆' : undefined} name="trophy-outline" color={color} label="Awards" />
           ),
         }}
       />
@@ -75,7 +69,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name={focused ? 'person' : 'person-outline'} color={color} focused={focused} label="Profile" />
+            <TabIcon name={focused ? 'person-circle' : 'person-circle-outline'} color={color} label="Me" />
           ),
         }}
       />
@@ -85,20 +79,14 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: 'rgba(20,10,40,0.97)',
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(18,8,38,0.98)',
+    borderTopColor: 'rgba(255,107,157,0.18)',
     borderTopWidth: 1,
     height: 80,
-    paddingBottom: 16,
+    paddingBottom: 14,
     paddingTop: 8,
   },
-  tabItem: {
-    alignItems: 'center',
-    gap: 2,
-  },
-  tabLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-  },
+  tabItem: { alignItems: 'center', gap: 2 },
+  tabEmoji: { fontSize: 20 },
+  tabLabel: { fontSize: 9, fontWeight: '700', letterSpacing: 0.4 },
 });

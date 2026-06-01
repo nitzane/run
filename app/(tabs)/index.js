@@ -7,30 +7,38 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../../src/context/AppContext';
-import { MOTIVATIONAL_QUOTES } from '../../src/data/mockData';
 import { BADGES } from '../../src/data/badges';
 import { Colors } from '../../src/utils/colors';
 import { formatPace, formatDuration } from '../../src/utils/hrZones';
 import GlassCard from '../../src/components/GlassCard';
 import ZoneBar from '../../src/components/ZoneBar';
 
-const { width } = Dimensions.get('window');
+const QUOTES = [
+  "She believed she could, so she ran. 🌸",
+  "Every step is a love letter to yourself. 💌",
+  "Run like the wind, glow like the sun. ✨",
+  "Strong legs, soft heart, wild spirit. 🌿",
+  "You're not just running — you're becoming. 💫",
+  "Chase the endorphins, not perfection. 🌺",
+  "One beautiful mile at a time. 🎀",
+];
 
-function FloatingOrb({ x, y, size, color, delay }) {
-  const anim = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.delay(delay),
-        Animated.timing(anim, { toValue: 1, duration: 3000 + Math.random() * 2000, useNativeDriver: true }),
-        Animated.timing(anim, { toValue: 0, duration: 3000 + Math.random() * 2000, useNativeDriver: true }),
-      ])
-    ).start();
-  }, []);
-  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [0, -20] });
-  const opacity = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.15, 0.3, 0.15] });
+function AppLogo() {
   return (
-    <Animated.View style={[styles.orb, { left: x, top: y, width: size, height: size, backgroundColor: color, borderRadius: size / 2, opacity, transform: [{ translateY }] }]} />
+    <View style={styles.logoWrap}>
+      <View style={styles.logoRow}>
+        <Text style={styles.logoSpark}>✦</Text>
+        <LinearGradient
+          colors={['#FF6B9D', '#E879B0', '#CE93D8']}
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+          style={styles.logoGrad}
+        >
+          <Text style={styles.logoText}>runflow</Text>
+        </LinearGradient>
+        <Text style={styles.logoSpark}>✦</Text>
+      </View>
+      <Text style={styles.logoTagline}>your running bestie 🎀</Text>
+    </View>
   );
 }
 
@@ -44,7 +52,7 @@ export default function HomeScreen() {
   const slideAnim = useRef(new Animated.Value(30)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  const quote = MOTIVATIONAL_QUOTES[new Date().getDay() % MOTIVATIONAL_QUOTES.length];
+  const quote = QUOTES[new Date().getDay() % QUOTES.length];
   const recentBadges = BADGES.filter(b => unlockedBadges.includes(b.id)).slice(0, 5);
   const lastRun = runs[0];
 
@@ -75,16 +83,16 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-          <View style={styles.header}>
+          <AppLogo />
+          <View style={styles.greetingRow}>
             <View>
-              <Text style={styles.greeting}>Good morning,</Text>
-              <Text style={styles.userName}>{user?.name} ✨</Text>
+              <Text style={styles.greeting}>Hey {user?.name} 🌸</Text>
+              <Text style={styles.quote}>"{quote}"</Text>
             </View>
             <TouchableOpacity style={styles.notifBtn}>
-              <Ionicons name="notifications-outline" size={22} color={Colors.white} />
+              <Ionicons name="notifications-outline" size={20} color="rgba(255,255,255,0.7)" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.quote}>"{quote}"</Text>
         </Animated.View>
 
         {/* Weekly Stats Ring */}
@@ -253,29 +261,36 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { flex: 1 },
-  orb: { position: 'absolute', zIndex: 0 },
-  header: {
+
+  logoWrap: { alignItems: 'center', paddingTop: 4, marginBottom: 16 },
+  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  logoGrad: { borderRadius: 8, paddingHorizontal: 2 },
+  logoText: { fontSize: 36, fontWeight: '900', color: '#fff', letterSpacing: -1, fontStyle: 'italic' },
+  logoSpark: { fontSize: 18, color: '#FF6B9D' },
+  logoTagline: { fontSize: 12, color: 'rgba(255,107,157,0.7)', fontStyle: 'italic', marginTop: 2, letterSpacing: 0.5 },
+
+  greetingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     paddingHorizontal: 20,
+    marginBottom: 4,
   },
-  greeting: { fontSize: 16, color: Colors.muted },
-  userName: { fontSize: 28, fontWeight: '800', color: Colors.white, marginTop: 2 },
+  greeting: { fontSize: 20, fontWeight: '700', color: Colors.white },
   notifBtn: {
-    width: 44, height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    width: 38, height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   quote: {
     fontSize: 13,
-    color: Colors.muted,
+    color: 'rgba(255,255,255,0.5)',
     fontStyle: 'italic',
-    paddingHorizontal: 20,
-    marginTop: 10,
-    lineHeight: 20,
+    marginTop: 4,
+    lineHeight: 19,
+    maxWidth: '85%',
   },
   statsCard: { marginHorizontal: 20 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.white, marginBottom: 12 },

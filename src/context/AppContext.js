@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DEFAULT_AVATAR } from '../data/avatarItems';
 
 const STORAGE_KEY = '@runflow_user_v1';
 
@@ -14,7 +13,6 @@ export function AppProvider({ children }) {
   const [activePlanId, setActivePlanId] = useState(null);
   const [planProgress, setPlanProgress] = useState({ week: 1, day: 1 });
   const [lastRun, setLastRun] = useState(null);
-  const [avatar, setAvatar] = useState(DEFAULT_AVATAR);
   const [xp, setXp] = useState(0);
   const [trainingDays, setTrainingDays] = useState([1, 3, 5]);
 
@@ -30,7 +28,6 @@ export function AppProvider({ children }) {
           if (saved.unlockedBadges) setUnlockedBadges(saved.unlockedBadges);
           if (saved.activePlanId) setActivePlanId(saved.activePlanId);
           if (saved.planProgress) setPlanProgress(saved.planProgress);
-          if (saved.avatar) setAvatar(saved.avatar);
           if (typeof saved.xp === 'number') setXp(saved.xp);
           if (saved.trainingDays) setTrainingDays(saved.trainingDays);
         }
@@ -85,11 +82,6 @@ export function AppProvider({ children }) {
     });
   }, [persist]);
 
-  const setAvatarAndSave = useCallback((av) => {
-    setAvatar(av);
-    persist({ avatar: av });
-  }, [persist]);
-
   const setXpAndSave = useCallback((fn) => {
     setXp(prev => {
       const next = typeof fn === 'function' ? fn(prev) : fn;
@@ -139,7 +131,6 @@ export function AppProvider({ children }) {
       activePlanId, setActivePlanId: setActivePlanAndSave,
       planProgress, setPlanProgress,
       lastRun,
-      avatar, setAvatar: setAvatarAndSave,
       xp, setXp: setXpAndSave,
       trainingDays, setTrainingDays: setTrainingDaysAndSave,
     }}>
