@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { MOCK_USER, MOCK_RUNS, MOCK_STATS, MOCK_UNLOCKED_BADGES } from '../data/mockData';
+import { DEFAULT_AVATAR } from '../data/avatarItems';
 
 const AppContext = createContext(null);
 
@@ -11,6 +12,8 @@ export function AppProvider({ children }) {
   const [activePlanId, setActivePlanId] = useState(MOCK_USER.currentPlanId);
   const [planProgress, setPlanProgress] = useState({ week: MOCK_USER.currentPlanWeek, day: 1 });
   const [lastRun, setLastRun] = useState(null);
+  const [avatar, setAvatar] = useState(DEFAULT_AVATAR);
+  const [xp, setXp] = useState(1240); // demo XP
 
   const saveRun = useCallback((runData) => {
     const newRun = { ...runData, id: `r${Date.now()}`, date: new Date().toISOString() };
@@ -38,6 +41,8 @@ export function AppProvider({ children }) {
       activePlanId, setActivePlanId,
       planProgress, setPlanProgress,
       lastRun,
+      avatar, setAvatar,
+      xp, setXp,
     }}>
       {children}
     </AppContext.Provider>

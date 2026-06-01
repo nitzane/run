@@ -64,6 +64,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="avatar"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? 'shirt' : 'shirt-outline'} color={color} focused={focused} label="Avatar" />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           tabBarIcon: ({ color, focused }) => (
