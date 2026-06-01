@@ -27,13 +27,7 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font",
-      [
-        "expo-speech",
-        {
-          "microphonePermission": false
-        }
-      ]
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": false
